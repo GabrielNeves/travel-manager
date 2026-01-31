@@ -50,6 +50,25 @@ pnpm --filter @travel-manager/web dev
 
 **Cache/Queue:** Redis 7 (Docker, port 6379). Reserved for BullMQ job scheduling (not yet implemented).
 
+## API Module Pattern
+
+Backend features are organized into modules under `apps/api/src/modules/`. Each module follows this structure:
+
+- `*.schemas.ts` — Zod validation schemas and TypeScript types
+- `*.service.ts` — Business logic and Prisma queries
+- `*.routes.ts` — Fastify route handlers (uses `authGuard` for protected routes, Zod `safeParse()` for validation)
+- `*.plugin.ts` — Fastify plugin that registers routes with a URL prefix
+
+Existing modules: `auth` (`/api/auth`), `settings` (`/api/settings`). Plugins are registered in `apps/api/src/index.ts`.
+
+## Frontend Patterns
+
+- **State:** Zustand for auth (access token in memory, not localStorage). TanStack Query for server state.
+- **API calls:** `apiClient<T>(path, options)` in `src/lib/api-client.ts` — auto-attaches Bearer token, handles 401 refresh/retry.
+- **Hooks:** `src/hooks/use-auth.ts` (login/register/logout mutations), `src/hooks/use-settings.ts` (settings + profile queries/mutations).
+- **UI:** shadcn/ui components in `src/components/ui/`, layout shell in `src/components/layout/`.
+- **Forms:** Zod schema validation with `safeParse()`, field-level error state, sonner toasts for feedback.
+
 ## Key Patterns
 
 - All packages use ESM (`"type": "module"`). Use `.js` extensions in relative imports within compiled code.
