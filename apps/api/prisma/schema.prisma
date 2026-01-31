@@ -1,0 +1,250 @@
+// Travel Manager Database Schema
+// Docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================
+// User & Authentication
+// ============================================
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  passwordHash  String?   // Null for OAuth-only users
+  phone         String?   // WhatsApp number
+  language      Language  @default(PT_BR)
+  country       String    @default("BR")
+  timezone      String    @default("America/Sao_Paulo")
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // Relations
+  accounts      Account[]
+  alerts        FlightAlert[]
+  notifications Notification[]
+  purchases     Purchase[]
+  settings      UserSettings?
+
+  @@map("users")
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  provider          String  // "google" or "credentials"
+  providerAccountId String
+  accessToken       String?
+  refreshToken      String?
+  expiresAt         Int?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model UserSettings {
+  id                      String   @id @default(cuid())
+  userId                  String   @unique
+  notifyInApp             Boolean  @default(true)
+  notifyWhatsApp          Boolean  @default(false)
+  notifyPush              Boolean  @default(false)
+  notifyOnHistoricalLow   Boolean  @default(true)
+  defaultCheckFrequency   CheckFrequency @default(HOURS_6)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_settings")
+}
+
+// ============================================
+// Flight Alerts & Price Tracking
+// ============================================
+
+model FlightAlert {
+  id                    String         @id @default(cuid())
+  userId                String
+
+  // Route
+  departureCity         String
+  departureAirportCode  String?
+  destinationCity       String
+  destinationAirportCode String?
+
+  // Trip details
+  tripType              TripType
+  departureDate         DateTime       @db.Date
+  departureDateEnd      DateTime?      @db.Date  // For flexible date range
+  departureDayShift     DayShift[]
+  returnDate            DateTime?      @db.Date  // For round-trip
+  returnDateEnd         DateTime?      @db.Date  // For flexible return date range
+  returnDayShift        DayShift[]
+
+  // Filters
+  priceThreshold        Decimal        @db.Decimal(10, 2)
+  airlines              String[]       // Empty = any airline
+  maxFlightDuration     Int?           // In minutes
+
+  // Scheduling
+  checkFrequency        CheckFrequency @default(HOURS_6)
+  lastCheckedAt         DateTime?
+  nextCheckAt           DateTime?
+
+  // Status
+  status                AlertStatus    @default(ACTIVE)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime       @updatedAt
+
+  // Relations
+  user                  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  priceRecords          PriceRecord[]
+  notifications         Notification[]
+  purchases             Purchase[]
+
+  @@index([userId, status])
+  @@index([nextCheckAt, status])
+  @@map("flight_alerts")
+}
+
+model PriceRecord {
+  id            String   @id @default(cuid())
+  alertId       String
+
+  // Price info
+  price         Decimal  @db.Decimal(10, 2)
+  currency      String   @default("BRL")
+
+  // Flight details
+  airline       String
+  flightNumber  String?
+  departureTime DateTime
+  arrivalTime   DateTime
+  duration      Int      // In minutes
+  stops         Int      @default(0)
+
+  // Booking
+  bookingLink   String?
+
+  // Metadata
+  checkedAt     DateTime @default(now())
+
+  // Relations
+  alert         FlightAlert @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@index([alertId, checkedAt])
+  @@index([alertId, price])
+  @@map("price_records")
+}
+
+// ============================================
+// Notifications
+// ============================================
+
+model Notification {
+  id        String              @id @default(cuid())
+  userId    String
+  alertId   String?
+
+  channel   NotificationChannel
+  title     String
+  message   String              @db.Text
+  data      Json?               // Additional structured data
+
+  read      Boolean             @default(false)
+  sentAt    DateTime            @default(now())
+
+  // Relations
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alert     FlightAlert?        @relation(fields: [alertId], references: [id], onDelete: SetNull)
+
+  @@index([userId, read, sentAt])
+  @@map("notifications")
+}
+
+// ============================================
+// Purchases & Calendar
+// ============================================
+
+model Purchase {
+  id              String   @id @default(cuid())
+  userId          String
+  alertId         String
+
+  // Purchase details
+  pricePaid       Decimal  @db.Decimal(10, 2)
+  currency        String   @default("BRL")
+  bookingReference String?
+  airline         String
+
+  // Flight details
+  departureTime   DateTime
+  arrivalTime     DateTime
+
+  // For round-trip: return flight info
+  returnDepartureTime DateTime?
+  returnArrivalTime   DateTime?
+
+  // Calendar integration
+  calendarEventId     String?  // Google Calendar event ID
+  returnCalendarEventId String? // For round-trip return flight
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Relations
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  alert           FlightAlert @relation(fields: [alertId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+  @@map("purchases")
+}
+
+// ============================================
+// Enums
+// ============================================
+
+enum Language {
+  PT_BR
+  EN_US
+}
+
+enum TripType {
+  ONE_WAY
+  ROUND_TRIP
+}
+
+enum DayShift {
+  MORNING    // 00:00 - 11:59
+  AFTERNOON  // 12:00 - 17:59
+  NIGHT      // 18:00 - 23:59
+}
+
+enum CheckFrequency {
+  HOURS_1
+  HOURS_3
+  HOURS_6
+  HOURS_12
+  HOURS_24
+}
+
+enum AlertStatus {
+  ACTIVE
+  PAUSED
+  DELETED
+}
+
+enum NotificationChannel {
+  IN_APP
+  WHATSAPP
+  PUSH
+}
