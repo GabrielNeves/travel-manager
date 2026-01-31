@@ -402,7 +402,7 @@ POST /api/calendar/event       - Create calendar event
 - [x] Database schema design and Prisma setup
 - [x] Authentication (Google OAuth + Email/Password)
 - [x] Basic UI structure with shadcn/ui
-- [ ] User settings page
+- [x] User settings page
 
 ### Phase 2: Core Features
 - [ ] Flight alert CRUD

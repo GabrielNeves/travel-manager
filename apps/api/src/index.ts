@@ -5,6 +5,7 @@ import { prisma } from './lib/prisma.js';
 import { env } from './lib/env.js';
 import jwtPlugin from './lib/jwt.plugin.js';
 import authPlugin from './modules/auth/auth.plugin.js';
+import settingsPlugin from './modules/settings/settings.plugin.js';
 
 const fastify = Fastify({
   logger: true,
@@ -16,6 +17,7 @@ await fastify.register(cors, {
 });
 await fastify.register(jwtPlugin);
 await fastify.register(authPlugin);
+await fastify.register(settingsPlugin);
 
 fastify.get('/health', async () => {
   try {

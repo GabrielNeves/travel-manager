@@ -3,7 +3,11 @@ import type { FastifyInstance } from 'fastify';
 import { prisma } from '../../lib/prisma.js';
 import { env } from '../../lib/env.js';
 import { exchangeGoogleCode, getGoogleProfile } from './auth.google.js';
-import type { RegisterInput, LoginInput } from './auth.schemas.js';
+import type {
+  RegisterInput,
+  LoginInput,
+  UpdateProfileInput,
+} from './auth.schemas.js';
 
 const BCRYPT_SALT_ROUNDS = 12;
 const ACCESS_TOKEN_EXPIRY = '15m';
@@ -265,6 +269,28 @@ export async function getCurrentUser(userId: string) {
   if (!user) {
     throw Object.assign(new Error('User not found'), { statusCode: 404 });
   }
+
+  return user;
+}
+
+export async function updateProfile(
+  userId: string,
+  input: UpdateProfileInput,
+) {
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: input,
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      phone: true,
+      language: true,
+      country: true,
+      timezone: true,
+      emailVerified: true,
+    },
+  });
 
   return user;
 }

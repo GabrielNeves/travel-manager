@@ -1,11 +1,16 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { registerSchema, loginSchema } from './auth.schemas.js';
+import {
+  registerSchema,
+  loginSchema,
+  updateProfileSchema,
+} from './auth.schemas.js';
 import {
   registerUser,
   loginUser,
   handleGoogleCallback,
   refreshAccessToken,
   getCurrentUser,
+  updateProfile,
 } from './auth.service.js';
 import { authGuard } from '../../lib/auth-guard.js';
 import { env } from '../../lib/env.js';
@@ -131,6 +136,25 @@ export default async function authRoutes(fastify: FastifyInstance): Promise<void
     { preHandler: [authGuard] },
     async (request: FastifyRequest, reply: FastifyReply) => {
       const user = await getCurrentUser(request.user.sub);
+      return reply.code(200).send(user);
+    },
+  );
+
+  // PATCH /api/auth/me (protected)
+  fastify.patch(
+    '/me',
+    { preHandler: [authGuard] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const parsed = updateProfileSchema.safeParse(request.body);
+      if (!parsed.success) {
+        return reply.code(400).send({
+          statusCode: 400,
+          error: 'Validation Error',
+          message: parsed.error.issues,
+        });
+      }
+
+      const user = await updateProfile(request.user.sub, parsed.data);
       return reply.code(200).send(user);
     },
   );
