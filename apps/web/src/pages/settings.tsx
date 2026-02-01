@@ -64,61 +64,62 @@ export function SettingsPage() {
             Choose how you want to be notified about price changes
           </CardDescription>
         </CardHeader>
-        <CardContent className="grid gap-6">
-          <div className="flex items-center justify-between">
-            <Label htmlFor="notify-in-app" className="flex flex-col gap-1">
+        <CardContent className="divide-y">
+          <div className="flex items-start justify-between py-4 first:pt-0 last:pb-0">
+            <Label htmlFor="notify-in-app" className="flex flex-col gap-1.5 pr-8">
               <span>In-App Notifications</span>
-              <span className="text-sm font-normal text-muted-foreground">
+              <span className="text-sm font-normal leading-snug text-muted-foreground">
                 Receive notifications within the application
               </span>
             </Label>
             <Switch
               id="notify-in-app"
+              className="mt-0.5"
               checked={settings.notifyInApp}
               onCheckedChange={(v) => handleToggle('notifyInApp', v)}
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <Label htmlFor="notify-whatsapp" className="flex flex-col gap-1">
+          <div className="flex items-start justify-between py-4 first:pt-0 last:pb-0">
+            <Label htmlFor="notify-whatsapp" className="flex flex-col gap-1.5 pr-8">
               <span>WhatsApp Notifications</span>
-              <span className="text-sm font-normal text-muted-foreground">
+              <span className="text-sm font-normal leading-snug text-muted-foreground">
                 Get alerts via WhatsApp messages
               </span>
             </Label>
             <Switch
               id="notify-whatsapp"
+              className="mt-0.5"
               checked={settings.notifyWhatsApp}
               onCheckedChange={(v) => handleToggle('notifyWhatsApp', v)}
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <Label htmlFor="notify-push" className="flex flex-col gap-1">
+          <div className="flex items-start justify-between py-4 first:pt-0 last:pb-0">
+            <Label htmlFor="notify-push" className="flex flex-col gap-1.5 pr-8">
               <span>Push Notifications</span>
-              <span className="text-sm font-normal text-muted-foreground">
+              <span className="text-sm font-normal leading-snug text-muted-foreground">
                 Browser push notifications for price drops
               </span>
             </Label>
             <Switch
               id="notify-push"
+              className="mt-0.5"
               checked={settings.notifyPush}
               onCheckedChange={(v) => handleToggle('notifyPush', v)}
             />
           </div>
 
-          <div className="flex items-center justify-between">
-            <Label
-              htmlFor="notify-historical-low"
-              className="flex flex-col gap-1"
-            >
+          <div className="flex items-start justify-between py-4 first:pt-0 last:pb-0">
+            <Label htmlFor="notify-historical-low" className="flex flex-col gap-1.5 pr-8">
               <span>Historical Low Alerts</span>
-              <span className="text-sm font-normal text-muted-foreground">
+              <span className="text-sm font-normal leading-snug text-muted-foreground">
                 Notify when a price hits its historical low
               </span>
             </Label>
             <Switch
               id="notify-historical-low"
+              className="mt-0.5"
               checked={settings.notifyOnHistoricalLow}
               onCheckedChange={(v) =>
                 handleToggle('notifyOnHistoricalLow', v)
@@ -136,13 +137,10 @@ export function SettingsPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between">
-            <Label
-              htmlFor="check-frequency"
-              className="flex flex-col gap-1"
-            >
+          <div className="flex items-start justify-between">
+            <Label htmlFor="check-frequency" className="flex flex-col gap-1.5 pr-8">
               <span>Check Frequency</span>
-              <span className="text-sm font-normal text-muted-foreground">
+              <span className="text-sm font-normal leading-snug text-muted-foreground">
                 How often to check prices for new alerts
               </span>
             </Label>
@@ -150,7 +148,7 @@ export function SettingsPage() {
               value={settings.defaultCheckFrequency}
               onValueChange={handleFrequencyChange}
             >
-              <SelectTrigger id="check-frequency" className="w-48">
+              <SelectTrigger id="check-frequency" className="w-48 shrink-0">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
