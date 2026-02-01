@@ -6,6 +6,7 @@ import { env } from './lib/env.js';
 import jwtPlugin from './lib/jwt.plugin.js';
 import authPlugin from './modules/auth/auth.plugin.js';
 import settingsPlugin from './modules/settings/settings.plugin.js';
+import alertsPlugin from './modules/alerts/alerts.plugin.js';
 
 const fastify = Fastify({
   logger: true,
@@ -18,6 +19,7 @@ await fastify.register(cors, {
 await fastify.register(jwtPlugin);
 await fastify.register(authPlugin);
 await fastify.register(settingsPlugin);
+await fastify.register(alertsPlugin);
 
 fastify.get('/health', async () => {
   try {
