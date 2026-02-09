@@ -14,7 +14,7 @@ const ALERT_INCLUDE = {
   priceRecords: {
     orderBy: { price: 'asc' as const },
     take: 1,
-    select: { price: true },
+    select: { price: true, airline: true, flightNumber: true, departureTime: true },
   },
 };
 
@@ -27,6 +27,9 @@ function serializeAlert(alert: any) {
       priceRecords?.[0]?.price != null
         ? Number(priceRecords[0].price)
         : null,
+    lowestPriceAirline: priceRecords?.[0]?.airline ?? null,
+    lowestPriceFlightNumber: priceRecords?.[0]?.flightNumber ?? null,
+    lowestPriceDepartureTime: priceRecords?.[0]?.departureTime ?? null,
     priceRecordCount: _count?.priceRecords ?? 0,
   };
 }

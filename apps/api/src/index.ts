@@ -7,6 +7,8 @@ import jwtPlugin from './lib/jwt.plugin.js';
 import authPlugin from './modules/auth/auth.plugin.js';
 import settingsPlugin from './modules/settings/settings.plugin.js';
 import alertsPlugin from './modules/alerts/alerts.plugin.js';
+import airportsPlugin from './modules/airports/airports.plugin.js';
+import { startJobSystem, stopJobSystem } from './jobs/index.js';
 
 const fastify = Fastify({
   logger: true,
@@ -20,6 +22,7 @@ await fastify.register(jwtPlugin);
 await fastify.register(authPlugin);
 await fastify.register(settingsPlugin);
 await fastify.register(alertsPlugin);
+await fastify.register(airportsPlugin);
 
 fastify.get('/health', async () => {
   try {
@@ -41,6 +44,8 @@ const start = async () => {
 
     await fastify.listen({ port, host });
     console.log(`Server running at http://${host}:${port}`);
+
+    await startJobSystem();
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
@@ -48,6 +53,7 @@ const start = async () => {
 };
 
 const shutdown = async () => {
+  await stopJobSystem();
   await prisma.$disconnect();
   await fastify.close();
   process.exit(0);

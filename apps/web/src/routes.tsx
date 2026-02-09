@@ -59,6 +59,10 @@ export const router = createBrowserRouter([
         handle: { title: 'Flight Alerts' },
       },
       {
+        path: 'alerts/:id',
+        element: <Navigate to="/alerts" replace />,
+      },
+      {
         path: 'notifications',
         element: <NotificationsPage />,
         handle: { title: 'Notifications' },

@@ -282,6 +282,15 @@ Frequent travelers spend significant time manually checking flight prices across
 - `GET /shopping/flight-offers` - Search for flights
 - `GET /reference-data/locations` - Airport/city autocomplete
 
+### Cost Control
+
+Amadeus does not offer built-in spending caps. To prevent unexpected billing in production, the application implements a client-side monthly API call counter:
+
+- **Storage:** Redis key per calendar month, auto-expires after 35 days
+- **Configurable limit:** `AMADEUS_MONTHLY_CALL_LIMIT` env var (default: 2,000)
+- **Behavior when limit reached:** Price check jobs are skipped (not lost — alerts are rescheduled for next cycle). Warning logged at 80% usage, error logged when limit is hit.
+- **Monitoring:** Current usage count available for admin/settings UI
+
 ### Fallback Option
 Kiwi.com Tequila API as secondary source for price comparison
 
@@ -324,8 +333,14 @@ GET /api/alerts/:id/current    - Get current lowest price
 
 ### Notifications
 ```
-GET  /api/notifications        - List notifications
-POST /api/notifications/:id/read - Mark as read
+GET  /api/notifications              - List notifications
+POST /api/notifications/:id/read     - Mark as read
+GET  /api/notifications/unread-count - Get unread notification count
+```
+
+### Airports
+```
+GET /api/airports/search       - Airport/city autocomplete (query: ?q=...)
 ```
 
 ### Settings
@@ -405,11 +420,13 @@ POST /api/calendar/event       - Create calendar event
 - [x] User settings page
 
 ### Phase 2: Core Features
-- [ ] Flight alert CRUD
-- [ ] Amadeus API integration
+- [x] Flight alert CRUD
+- [x] Amadeus API integration
+- [x] Flight alerts frontend (list, create, edit, detail)
 - [ ] Price check scheduler (BullMQ)
-- [ ] In-app notifications
-- [ ] Price history storage
+- [ ] Price history storage & frontend
+- [ ] In-app notifications backend
+- [ ] Notifications frontend & sidebar badge
 
 ### Phase 3: Notifications & Analytics
 - [ ] WhatsApp integration (Evolution API)
@@ -429,6 +446,7 @@ POST /api/calendar/event       - Create calendar event
 - [ ] Terraform GCP configuration
 - [ ] CI/CD pipeline
 - [ ] Monitoring and logging
+- [ ] Migrate Amadeus API from test to production environment (update BASE_URL and API credentials)
 - [ ] Production deployment
 
 ### Phase 6: Auth Hardening

@@ -11,6 +11,9 @@ const envSchema = z.object({
   GOOGLE_CLIENT_ID: z.string().default(''),
   GOOGLE_CLIENT_SECRET: z.string().default(''),
   GOOGLE_CALLBACK_URL: z.string().default('http://localhost:3000/api/auth/google/callback'),
+  AMADEUS_API_KEY: z.string().default(''),
+  AMADEUS_API_SECRET: z.string().default(''),
+  AMADEUS_MONTHLY_CALL_LIMIT: z.string().default('2000'),
 });
 
 export type Env = z.infer<typeof envSchema>;

@@ -20,9 +20,11 @@
     "@prisma/adapter-pg": "^7.3.0",
     "@prisma/client": "^7.3.0",
     "bcryptjs": "^3.0.3",
+    "bullmq": "^5.67.2",
     "dotenv": "^17.2.3",
     "fastify": "^5.2.1",
     "fastify-plugin": "^5.1.0",
+    "ioredis": "^5.9.2",
     "pg": "^8.17.2",
     "zod": "^4.3.6"
   },
